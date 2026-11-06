@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TikTok Vocabulary Challenge</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+  :root{
+    --green:#22c55e; --green-dark:#16a34a; --pink:#ec4899; --blue:#3b82f6;
+    --dark:#0f172a; --gray:#64748b; --light:#f1f5f9; --white:#fff; --red:#ef4444;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Poppins,sans-serif;}
+  body{background:var(--light);color:var(--dark);line-height:1.6;}
+  a{text-decoration:none;color:inherit;}
+  button{cursor:pointer;border:none;font-family:inherit;}
+
+  /* HEADER */
+  header{background:var(--dark);color:#fff;padding:14px 20px;position:sticky;top:0;z-index:100;
+    display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;}
+  .logo{font-size:20px;font-weight:800;color:var(--green);}
+  .logo span{color:#fff;}
+  nav{display:flex;gap:6px;flex-wrap:wrap;}
+  nav button{background:transparent;color:#cbd5e1;padding:8px 12px;border-radius:8px;font-size:14px;transition:.2s;}
+  nav button:hover{background:#1e293b;color:#fff;}
+  nav button.active{background:var(--green);color:#fff;font-weight:600;}
+
+  /* MAIN */
+  main{max-width:1100px;margin:0 auto;padding:24px 16px 60px;}
+  .page{display:none;animation:fade .3s;}
+  .page.active{display:block;}
+  @keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  h1{font-size:32px;margin-bottom:8px;}
+  h2{font-size:24px;margin:20px 0 12px;}
+  .muted{color:var(--gray);}
+
+  /* HERO */
+  .hero{background:linear-gradient(135deg,var(--green),var(--blue));color:#fff;border-radius:20px;
+    padding:40px 28px;text-align:center;margin-bottom:24px;}
+  .hero h1{font-size:38px;color:#fff;}
+  .hero p{font-size:18px;margin:10px 0 20px;opacity:.95;}
+  .btn{background:var(--green);color:#fff;padding:12px 24px;border-radius:12px;font-size:16px;font-weight:600;transition:.2s;}
+  .btn:hover{background:var(--green-dark);transform:translateY(-2px);}
+  .btn.pink{background:var(--pink);}
+  .btn.pink:hover{background:#db2777;}
+  .btn.blue{background:var(--blue);}
+  .btn.blue:hover{background:#2563eb;}
+  .btn.ghost{background:#fff;color:var(--dark);}
+  .btn.ghost:hover{background:#e2e8f0;}
+  .btn.small{padding:8px 16px;font-size:14px;}
+
+  /* CARDS GRID */
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:16px;}
+  .card{background:#fff;border-radius:16px;padding:18px;box-shadow:0 2px 10px rgba(0,0,0,.06);transition:.2s;}
+  .card:hover{transform:translateY(-3px);box-shadow:0 8px 20px rgba(0,0,0,.1);}
+
+  /* STEPS */
+  .steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin:16px 0;}
+  .step{background:#fff;border-radius:14px;padding:18px;text-align:center;}
+  .step .num{width:38px;height:38px;background:var(--green);color:#fff;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;font-weight:800;margin:0 auto 10px;}
+
+  /* VOCAB */
+  .search-bar{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;}
+  .search-bar input{flex:1;min-width:180px;padding:12px 16px;border:2px solid #e2e8f0;border-radius:12px;font-size:15px;}
+  .search-bar input:focus{outline:none;border-color:var(--green);}
+  .vocab-card{background:#fff;border-radius:16px;padding:18px;box-shadow:0 2px 10px rgba(0,0,0,.06);
+    position:relative;border:2px solid transparent;transition:.2s;}
+  .vocab-card.learned{border-color:var(--green);background:#f0fdf4;}
+  .vocab-card .emoji{font-size:34px;}
+  .vocab-card .en{font-size:20px;font-weight:800;color:var(--dark);margin:6px 0;}
+  .vocab-card .kz{font-size:15px;color:var(--gray);}
+  .vocab-card .ex{font-size:13px;color:var(--gray);font-style:italic;margin-top:8px;border-top:1px dashed #e2e8f0;padding-top:8px;}
+  .vocab-card .actions{display:flex;gap:8px;margin-top:12px;}
+  .icon-btn{background:var(--light);border-radius:10px;padding:6px 10px;font-size:14px;transition:.2s;}
+  .icon-btn:hover{background:#e2e8f0;}
+
+  /* PROGRESS BAR */
+  .progress-wrap{background:#e2e8f0;border-radius:20px;height:14px;overflow:hidden;margin:8px 0;}
+  .progress-bar{height:100%;background:linear-gradient(90deg,var(--green),var(--blue));border-radius:20px;transition:width .4s;}
+
+  /* GAME */
+  .game-box{background:#fff;border-radius:18px;padding:24px;box-shadow:0 2px 10px rgba(0,0,0,.06);}
+  .match-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px;}
+  .match-item{padding:14px;border-radius:12px;background:var(--light);text-align:center;
+    font-weight:600;cursor:pointer;transition:.2s;border:2px solid transparent;}
+  .match-item:hover{background:#e2e8f0;}
+  .match-item.selected{border-color:var(--blue);background:#dbeafe;}
+  .match-item.correct{background:#dcfce7;border-color:var(--green);cursor:default;}
+  .match-item.wrong{background:#fee2e2;border-color:var(--red);animation:shake .3s;}
+  @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+
+  .memory-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:16px;}
+  .mem-card{aspect-ratio:1;border-radius:12px;background:var(--blue);color:#fff;
+    display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;
+    cursor:pointer;transition:.3s;text-align:center;padding:6px;}
+  .mem-card.flipped{background:#fff;color:var(--dark);border:2px solid var(--blue);}
+  .mem-card.matched{background:var(--green);color:#fff;cursor:default;}
+
+  .quiz-question{font-size:20px;font-weight:700;margin:16px 0;}
+  .quiz-options{display:grid;gap:10px;}
+  .quiz-option{padding:14px 18px;border-radius:12px;background:var(--light);text-align:left;
+    font-size:16px;transition:.2s;border:2px solid transparent;}
+  .quiz-option:hover{background:#e2e8f0;}
+  .quiz-option.correct{background:#dcfce7;border-color:var(--green);}
+  .quiz-option.wrong{background:#fee2e2;border-color:var(--red);}
+  .quiz-option:disabled{cursor:default;}
+
+  .timer{font-size:18px;font-weight:800;color:var(--pink);}
+
+  /* RESULTS */
+  .stat-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin:16px 0;}
+  .stat{background:#fff;border-radius:14px;padding:18px;text-align:center;}
+  .stat .big{font-size:30px;font-weight:800;color:var(--green);}
+  .stat .lbl{font-size:13px;color:var(--gray);}
+  table{width:100%;border-collapse:collapse;background:#fff;border-radius:14px;overflow:hidden;margin:16px 0;}
+  th,td{padding:12px 14px;text-align:left;border-bottom:1px solid #e2e8f0;font-size:14px;}
+  th{background:var(--dark);color:#fff;}
+  .chart-box{background:#fff;border-radius:16px;padding:18px;margin:16px 0;}
+
+  /* AUTH / PROFILE */
+  .form-box{background:#fff;border-radius:16px;padding:24px;max-width:420px;margin:0 auto;}
+  .form-box input{width:100%;padding:12px 16px;border:2px solid #e2e8f0;border-radius:12px;margin-bottom:12px;font-size:15px;}
+  .form-box input:focus{outline:none;border-color:var(--green);}
+  .form-box label{font-size:14px;font-weight:600;color:var(--gray);display:block;margin-bottom:4px;}
+
+  .result-screen{text-align:center;padding:20px;}
+  .result-screen .score{font-size:52px;font-weight:800;color:var(--green);}
+
+  footer{background:var(--dark);color:#94a3b8;text-align:center;padding:24px;font-size:14px;margin-top:40px;}
+
+  @media(max-width:600px){
+    .hero h1{font-size:28px;}
+    h1{font-size:24px;}
+    .match-grid{grid-template-columns:1fr;}
+    .memory-grid{grid-template-columns:repeat(3,1fr);}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">TikTok <span>Vocabulary</span></div>
+  <nav id="nav">
+    <button data-page="home" class="active">Басты бет</button>
+    <button data-page="vocab">Сөздік</button>
+    <button data-page="videos">Видео</button>
+    <button data-page="games">Ойындар</button>
+    <button data-page="quizzes">Тесттер</button>
+    <button data-page="results">Нәтижелер</button>
+    <button data-page="about">Жоба туралы</button>
+    <button data-page="auth">Кіру</button>
+  </nav>
+</header>
+
+<main>
+
+<!-- ================= HOME ================= -->
+<section id="page-home" class="page active">
+  <div class="hero">
+    <h1>TikTok Vocabulary Challenge</h1>
+    <p>Watch. Learn. Remember. Play.</p>
+    <button class="btn ghost" onclick="go('vocab')">Бастау →</button>
+    <button class="btn pink" onclick="go('videos')">Видео көру</button>
+  </div>
+
+  <h2>Қалай жұмыс істейді?</h2>
+  <div class="steps">
+    <div class="step"><div class="num">1</div><b>Watch</b><p class="muted">Қысқа видеолар көр</p></div>
+    <div class="step"><div class="num">2</div><b>Learn</b><p class="muted">Жаңа сөздер үйрен</p></div>
+    <div class="step"><div class="num">3</div><b>Remember</b><p class="muted">Карточкалармен қайтала</p></div>
+    <div class="step"><div class="num">4</div><b>Play</b><p class="muted">Ойындар мен тесттер</p></div>
+  </div>
+
+  <h2>Сіздің прогресіңіз</h2>
+  <div class="card">
+    <p class="muted">Үйренген сөздер: <b id="home-learned">0</b> / 20</p>
+    <div class="progress-wrap"><div class="progress-bar" id="home-bar" style="width:0%"></div></div>
+    <p class="muted" id="home-test-info">Әзірге тест тапсырылмаған.</p>
+    <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="btn small" onclick="go('vocab')">Сөз үйрену</button>
+      <button class="btn small blue" onclick="go('quizzes')">Тест тапсыру</button>
+    </div>
+  </div>
+
+  <h2>Тақырып: Environment and Recycling</h2>
+  <div class="grid">
+    <div class="card"><div class="emoji" style="font-size:34px">♻️</div><b>Recycling</b><p class="muted">Қайта өңдеу туралы сөздер</p></div>
+    <div class="card"><div class="emoji" style="font-size:34px">🌍</div><b>Environment</b><p class="muted">Қоршаған орта</p></div>
+    <div class="card"><div class="emoji" style="font-size:34px">🗑️</div><b>Pollution</b><p class="muted">Ластану</p></div>
+  </div>
+</section>
+
+<!-- ================= VOCAB ================= -->
+<section id="page-vocab" class="page">
+  <h1>Сөздік</h1>
+  <p class="muted">Environment and Recycling — 20 сөз</p>
+  <div class="search-bar">
+    <input id="search" placeholder="Сөз іздеу..." oninput="renderVocab()">
+    <button class="btn small ghost" onclick="resetProgress()">Прогресті тазалау</button>
+  </div>
+  <div class="grid" id="vocab-grid"></div>
+</section>
+
+<!-- ================= VIDEOS ================= -->
+<section id="page-videos" class="page">
+  <h1>Видео сабақтар</h1>
+  <p class="muted">TikTok стиліндегі қысқа видеолар</p>
+  <div class="grid" id="video-grid"></div>
+</section>
+
+<!-- ================= GAMES ================= -->
+<section id="page-games" class="page">
+  <h1>Ойындар</h1>
+  <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;">
+    <button class="btn small" onclick="startMatch()">Word Match</button>
+    <button class="btn small blue" onclick="startMemory()">Memory Card</button>
+    <button class="btn small pink" onclick="startSprint()">Quiz Sprint</button>
+  </div>
+  <div class="game-box" id="game-box">
+    <p class="muted">Ойын таңдаңыз.</p>
+  </div>
+</section>
+
+<!-- ================= QUIZZES ================= -->
+<section id="page-quizzes" class="page">
+  <h1>Тесттер</h1>
+  <p class="muted">Environment and Recycling</p>
+  <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;">
+    <button class="btn small" onclick="startQuiz('choice')">Multiple Choice</button>
+    <button class="btn small blue" onclick="startQuiz('fill')">Fill in the Blank</button>
+    <button class="btn small pink" onclick="startQuiz('tf')">True / False</button>
+  </div>
+  <div class="game-box" id="quiz-box">
+    <p class="muted">Тест таңдаңыз.</p>
+  </div>
+</section>
+
+<!-- ================= RESULTS ================= -->
+<section id="page-results" class="page">
+  <h1>Эксперимент нәтижелері</h1>
+  <p class="muted">Бақылау және эксперимент топтарын салыстыру</p>
+
+  <div class="stat-row">
+    <div class="stat"><div class="big">24</div><div class="lbl">Қатысушы</div></div>
+    <div class="stat"><div class="big" id="res-tests">0</div><div class="lbl">Сіздің тестіңіз</div></div>
+    <div class="stat"><div class="big" id="res-avg">0%</div><div class="lbl">Орташа балл</div></div>
+    <div class="stat"><div class="big">+18%</div><div class="lbl">Орташа өсім</div></div>
+  </div>
+
+  <div class="chart-box">
+    <h2>Pre-test vs Post-test</h2>
+    <canvas id="expChart" height="120"></canvas>
+  </div>
+
+  <table>
+    <tr><th>Топ</th><th>Оқушы саны</th><th>Pre-test</th><th>Post-test</th><th>Өсім</th></tr>
+    <tr><td>Бақылау</td><td>12</td><td>54%</td><td>62%</td><td>+8%</td></tr>
+    <tr><td>Эксперимент</td><td>12</td><td>53%</td><td>71%</td><td>+18%</td></tr>
+  </table>
+</section>
+
+<!-- ================= ABOUT ================= -->
+<section id="page-about" class="page">
+  <h1>Жоба туралы</h1>
+  <div class="card">
+    <h2>«Зерде» ғылыми жобасы</h2>
+    <p><b>Мақсаты:</b> 7-сынып оқушыларының ағылшын сөздік қорын қысқа видеолар, визуалды материалдар, интерактивті ойындар мен тесттер арқылы арттыру.</p>
+    <p><b>Тақырып:</b> Environment and Recycling</p>
+    <p><b>Гипотеза:</b> Сайтты қолданған топтың сөздік қоры дәстүрлі әдіспен оқыған топқа қарағанда айтарлықтай жоғары артады.</p>
+    <p style="margin-top:12px;"><b>Автор:</b> 7-сынып оқушысы</p>
+    <p><b>Жетекші:</b> Ағылшын тілі мұғалімі</p>
+  </div>
+</section>
+
+<!-- ================= AUTH ================= -->
+<section id="page-auth" class="page">
+  <div class="form-box" id="auth-box">
+    <h2>Кіру</h2>
+    <label>Атыңыз</label>
+    <input id="auth-name" placeholder="Аты-жөні">
+    <label>Сынып</label>
+    <input id="auth-grade" placeholder="7">
+    <button class="btn" style="width:100%" onclick="login()">Кіру</button>
+    <p class="muted" style="margin-top:12px;font-size:13px;">* Деректер тек осы браузерде сақталады (localStorage).</p>
+  </div>
+  <div class="form-box" id="profile-box" style="display:none">
+    <h2 id="profile-name">Профиль</h2>
+    <p class="muted" id="profile-grade"></p>
+    <div class="progress-wrap"><div class="progress-bar" id="profile-bar" style="width:0%"></div></div>
+    <p class="muted" id="profile-stats"></p>
+    <button class="btn small ghost" onclick="logout()" style="margin-top:12px;">Шығу</button>
+  </div>
+</section>
+
+</main>
+
+<footer>© 2026 TikTok Vocabulary Challenge · «Зерде» ғылыми жобасы</footer>
+
+<script>
+/* ============ DATA ============ */
+const WORDS = [
+  {en:"environment", kz:"қоршаған орта", ex:"We must protect the environment.", emoji:"🌍", cat:"Nature"},
+  {en:"recycling", kz:"қайта өңдеу", ex:"Recycling helps the planet.", emoji:"♻️", cat:"Recycling"},
+  {en:"pollution", kz:"ластану", ex:"Air pollution is a big problem.", emoji:"🏭", cat:"Pollution"},
+  {en:"waste", kz:"қалдық, қоқыс", ex:"Don't waste water.", emoji:"🗑️", cat:"Pollution"},
+  {en:"plastic", kz:"пластик", ex:"Plastic bags are harmful.", emoji:"🛍️", cat:"Recycling"},
+  {en:"paper", kz:"қағаз", ex:"We recycle paper.", emoji:"📄", cat:"Recycling"},
+  {en:"glass", kz:"шыны", ex:"Glass bottles can be reused.", emoji:"🍾", cat:"Recycling"},
+  {en:"bin", kz:"қоқыс жәшігі", ex:"Put the trash in the bin.", emoji:"🗑️", cat:"Recycling"},
+  {en:"reuse", kz:"қайта пайдалану", ex:"Reuse your old clothes.", emoji:"🔁", cat:"Recycling"},
+  {en:"reduce", kz:"азайту", ex:"Reduce plastic use.", emoji:"⬇️", cat:"Recycling"},
+  {en:"litter", kz:"қоқыс тастау", ex:"Don't litter in the park.", emoji:"🚯", cat:"Pollution"},
+  {en:"climate", kz:"климат", ex:"Climate change is real.", emoji:"🌡️", cat:"Nature"},
+  {en:"energy", kz:"энергия", ex:"Save energy at home.", emoji:"⚡", cat:"Nature"},
+  {en:"tree", kz:"ағаш", ex:"Plant a tree today.", emoji:"🌳", cat:"Nature"},
+  {en:"water", kz:"су", ex:"Clean water is important.", emoji:"💧", cat:"Nature"},
+  {en:"air", kz:"ауа", ex:"We need fresh air.", emoji:"🌬️", cat:"Nature"},
+  {en:"soil", kz:"топырақ", ex:"Soil pollution kills plants.", emoji:"🪨", cat:"Nature"},
+  {en:"protect", kz:"қорғау", ex:"Protect wild animals.", emoji:"🛡️", cat:"Nature"},
+  {en:"clean", kz:"таза", ex:"Keep the city clean.", emoji:"🧹", cat:"Nature"},
+  {en:"planet", kz:"планета", ex:"Save our planet.", emoji:"🌎", cat:"Nature"}
+];
+
+const VIDEOS = [
+  {title:"Recycling Basics", dur:"0:25", words:["recycling","bin","paper","glass"], emoji:"♻️"},
+  {title:"Stop Pollution!", dur:"0:30", words:["pollution","litter","air","water"], emoji:"🏭"},
+  {title:"Save the Planet", dur:"0:20", words:["planet","protect","tree","climate"], emoji:"🌍"},
+  {title:"Reduce & Reuse", dur:"0:28", words:["reduce","reuse","plastic","waste"], emoji:"🔁"},
+  {title:"Clean Energy", dur:"0:22", words:["energy","clean","soil","environment"], emoji:"⚡"}
+];
+
+/* ============ STATE ============ */
+const store = {
+  get(k, d){ try{ return JSON.parse(localStorage.getItem(k)) ?? d }catch(e){ return d } },
+  set(k, v){ localStorage.setItem(k, JSON.stringify(v)) }
+};
+let learned = store.get('learned', []);
+let watched = store.get('watched', []);
+let testHistory = store.get('testHistory', []);
+let user = store.get('user', null);
+
+/* ============ NAV ============ */
+function go(page){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+page).classList.add('active');
+  document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('active', b.dataset.page===page));
+  window.scrollTo({top:0,behavior:'smooth'});
+  if(page==='home') renderHome();
+  if(page==='vocab') renderVocab();
+  if(page==='videos') renderVideos();
+  if(page==='results') renderResults();
+  if(page==='auth') renderAuth();
+}
+document.querySelectorAll('#nav button').forEach(b=>b.onclick=()=>go(b.dataset.page));
+
+/* ============ HOME ============ */
+function renderHome(){
+  const pct = Math.round(learned.length/WORDS.length*100);
+  document.getElementById('home-learned').textContent = learned.length;
+  document.getElementById('home-bar').style.width = pct+'%';
+  const info = document.getElementById('home-test-info');
+  if(testHistory.length){
+    const last = testHistory[testHistory.length-1];
+    info.textContent = `Соңғы тест: ${last.score}/${last.total} (${Math.round(last.score/last.total*100)}%)`;
+  } else info.textContent = 'Әзірге тест тапсырылмаған.';
+}
+
+/* ============ VOCAB ============ */
+function renderVocab(){
+  const q = (document.getElementById('search').value||'').toLowerCase();
+  const grid = document.getElementById('vocab-grid');
+  grid.innerHTML = '';
+  WORDS.filter(w=> w.en.toLowerCase().includes(q) || w.kz.toLowerCase().includes(q))
+    .forEach(w=>{
+      const isL = learned.includes(w.en);
+      const div = document.createElement('div');
+      div.className = 'vocab-card' + (isL?' learned':'');
+      div.innerHTML = `
+        <div class="emoji">${w.emoji}</div>
+        <div class="en">${w.en}</div>
+        <div class="kz">${w.kz}</div>
+        <div class="ex">${w.ex}</div>
+        <div class="actions">
+          <button class="icon-btn" onclick="speak('${w.en}')">🔊</button>
+          <button class="icon-btn" onclick="toggleLearn('${w.en}')">${isL?'✅ Үйрендім':'Үйрендім'}</button>
+        </div>`;
+      grid.appendChild(div);
+    });
+}
+function speak(text){
+  if('speechSynthesis' in window){
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = 'en-US'; u.rate = 0.9;
+    speechSynthesis.cancel(); speechSynthesis.speak(u);
+  }
+}
+function toggleLearn(en){
+  const i = learned.indexOf(en);
+  if(i>=0) learned.splice(i,1); else learned.push(en);
+  store.set('learned', learned);
+  renderVocab(); renderHome();
+}
+function resetProgress(){
+  if(confirm('Прогресті тазалау?')){
+    learned=[]; store.set('learned',[]);
+    testHistory=[]; store.set('testHistory',[]);
+    renderVocab(); renderHome();
+  }
+}
+
+/* ============ VIDEOS ============ */
+function renderVideos(){
+  const grid = document.getElementById('video-grid');
+  grid.innerHTML = '';
+  VIDEOS.forEach((v,i)=>{
+    const isW = watched.includes(i);
+    const div = document.createElement('div');
+    div.className = 'card';
+    div.innerHTML = `
+      <div style="font-size:48px;text-align:center;background:#0f172a;color:#fff;border-radius:12px;padding:30px 0;">${v.emoji}</div>
+      <h3 style="margin-top:10px;">${v.title}</h3>
+      <p class="muted">⏱ ${v.dur} · ${isW?'✅ көрілді':''}</p>
+      <p class="muted" style="font-size:13px;">Сөздер: ${v.words.join(', ')}</p>
+      <button class="btn small" style="margin-top:8px;" onclick="watchVideo(${i})">${isW?'Қайта көру':'Көру'}</button>`;
+    grid.appendChild(div);
+  });
+}
+function watchVideo(i){
+  if(!watched.includes(i)){ watched.push(i); store.set('watched', watched); }
+  const v = VIDEOS[i];
+  alert(`▶️ ${v.title}\n\nБұл видеодағы сөздер: ${v.words.join(', ')}\n\n(Нақты видео файлын қосу үшін <video> тегін пайдаланыңыз.)`);
+  renderVideos();
+}
+
+/* ============ GAMES ============ */
+const gameBox = document.getElementById('game-box');
+const quizBox = document.getElementById('quiz-box');
+
+/* --- Word Match --- */
+let matchState = {};
+function startMatch(){
+  const pick = shuffle([...WORDS]).slice(0,6);
+  const left = pick.map(w=>({id:w.en, text:w.en}));
+  const right = shuffle(pick.map(w=>({id:w.en, text:w.kz})));
+  matchState = {left, right, sel:null, done:0, total:pick.length, correct:0, wrong:0, start:Date.now()};
+  renderMatch();
+}
+function renderMatch(){
+  const s = matchState;
+  gameBox.innerHTML = `<h2>Word Match</h2><p class="muted">Ағылшын сөзін қазақша аудармасымен сәйкестендір.</p>
+    <div class="match-grid">
+      <div>${s.left.map(x=>`<div class="match-item ${x.id&&matchState.left.find(l=>l.id===x.id&&l.matched)?'correct':''}" data-side="L" data-id="${x.id}" onclick="pickMatch(this)">${x.text}</div>`).join('')}</div>
+      <div>${s.right.map(x=>`<div class="match-item ${x.matched?'correct':''}" data-side="R" data-id="${x.id}" onclick="pickMatch(this)">${x.text}</div>`).join('')}</div>
+    </div>
+    <p style="margin-top:14px;" class="muted">Дұрыс: <b id="m-c">0</b> · Қате: <b id="m-w">0</b></p>`;
+}
+let pending = null;
+function pickMatch(el){
+  if(el.classList.contains('correct')) return;
+  if(!pending){ pending = el; el.classList.add('selected'); return; }
+  if(pending === el){ pending.classList.remove('selected'); pending=null; return; }
+  const a = pending, b = el; pending = null;
+  a.classList.remove('selected');
+  const same = a.dataset.id === b.dataset.id && a.dataset.side !== b.dataset.side;
+  if(same){
+    a.classList.add('correct'); b.classList.add('correct');
+    matchState.correct++;
+  } else {
+    a.classList.add('wrong'); b.classList.add('wrong');
+    matchState.wrong++;
+    setTimeout(()=>{a.classList.remove('wrong');b.classList.remove('wrong');},400);
+  }
+  matchState.done++;
+  const cEl = document.getElementById('m-c'); if(cEl) cEl.textContent = matchState.correct;
+  const wEl = document.getElementById('m-w'); if(wEl) wEl.textContent = matchState.wrong;
+  if(matchState.correct === matchState.total){
+    const sec = Math.round((Date.now()-matchState.start)/1000);
+    setTimeout(()=>{
+      gameBox.innerHTML = `<div class="result-screen"><div class="score">🏆</div>
+        <h2>Керемет!</h2><p>Уақыт: ${sec} сек · Қате: ${matchState.wrong}</p>
+        <button class="btn" onclick="startMatch()">Қайта ойнау</button></div>`;
+    },300);
+  }
+}
+
+/* --- Memory --- */
+let memState = {};
+function startMemory(){
+  const pick = shuffle([...WORDS]).slice(0,6);
+  let cards = [];
+  pick.forEach((w,i)=>{ cards.push({pair:i,text:w.en,type:'en'}); cards.push({pair:i,text:w.kz,type:'kz'}); });
+  cards = shuffle(cards);
+  memState = {cards, flipped:[], matched:new Set(), moves:0, start:Date.now()};
+  renderMemory();
+}
+function renderMemory(){
+  const s = memState;
+  gameBox.innerHTML = `<h2>Memory Card</h2><
